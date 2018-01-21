@@ -72,14 +72,13 @@ class Knearest:
 
         for i in neighbor_indices:
             if self._y[i] in dict_label_freq:
-                dict_label_freq[self._y[i]] = dict_label_freq[self._y[i]][0] + 1
+                dict_label_freq[self._y[i]] = dict_label_freq[self._y[i]] + 1
             else:
                 dict_label_freq[self._y[i]] = 1
 
         # Retrieve the max frequent label
         v = list(dict_label_freq.values())
-        k = list(dict_label_freq.keys())
-        max_freq = k[v.index(max(v))]
+        max_freq = max(v)
         max_labels = []
 
         for i in dict_label_freq:
@@ -89,14 +88,13 @@ class Knearest:
         # In case of tie, return the labels which have more count frequency
         dict_label_count = {}
 
-        if len(max_label) > 1:
-            for i in max_label:
-                dict_label_count[i] = self._count[i]
+        if len(max_labels) > 1:
+            for i in max_labels:
+                dict_label_count[i] = self._counts[i]
 
             # Retrieve the max count label
             v = list(dict_label_count.values())
-            k = list(dict_label_count.keys())
-            max_count = k[v.index(max(v))]
+            max_count = max(v)
             max_count_label = []
 
             for i in dict_label_count:
@@ -106,7 +104,7 @@ class Knearest:
             return max_count_label[0]
 
         else:
-            return max_label[0]
+            return max_labels[0]
 
     def classify(self, example):
         """
@@ -115,8 +113,9 @@ class Knearest:
         :param example: A representation of an example in the same
         format as a row of the training data
         """
-        dist, ind = self._kdtree.query(example, self._k)
-        return self.majority(ind)
+        dist, ind = self._kdtree.query([example], self._k)
+        neighbors = np.asarray(ind).ravel()
+        return self.majority(neighbors)
 
     def confusion_matrix(self, test_x, test_y):
         """
